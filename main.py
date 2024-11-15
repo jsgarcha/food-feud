@@ -1,20 +1,27 @@
+# Imports
 import pandas as pd
-import numpy as np
 import random
+from sklearn.model_selection import train_test_split
 
+# Load the datasets
 df_restaurants = pd.read_csv('data/restaurants.csv')
-df_restaurant_menus = pd.read_csv('data/restaurant-menus.csv')
+df_menus = pd.read_csv('data/restaurant-menus.csv')
 
-print(random.choice(df_restaurants['name']))
+asked_restaurants = set()
+preferred_restaurants = []
+preference_number = 20
 
-# Maybe ask for 2 things: 'category' and 'price' rather than random?
+# Loops until it finds a restaurant that wasn't asked about before
+def get_restaurant():
+    while True:
+        restaurant = random.choice(df_restaurants['name'])
+        if restaurant not in asked_restaurants:
+            asked_restaurants.add(restaurant)
+            return restaurant
 
-#user_preferences = []
-#while len(user_preferences) <= 10:
-#    random.choice(df_restaurants['id'])
-#    restaurant_name = df_restaurants[]
-#    print('Do you like {}')
-
-# Currently, assume one user.
-# Train model on user_preferences. 
-# Then check with user, "was this to your liking?" If not, ask for preferences again and re-train.
+#Check if user prefers restaurant ("Do you like X?") If so, add to preference. If not, ask again.
+while len(preferred_restaurants) <= preference_number:
+    restaurant = get_restaurant()
+    prefers = input('Do you like ' + restaurant + '? (y/n)')
+    if prefers == 'y':
+        preferred_restaurants.append(restaurant)
