@@ -29,7 +29,7 @@ def load_restaurant_data():
     df_restaurants = pd.read_csv('./data/restaurants.csv')
     return df_restaurants
 
-def add_preferred():
+def add_preferred(): # Preference is a row in a DataFrame
     if st.session_state.progress < 100:
         st.session_state.progress += 100//PREFERRED_NUMBER
         st.session_state.preferred_count -= 1
@@ -44,17 +44,20 @@ def display_restaurants(df_restaurants):
             st.button(str(name), use_container_width=True, on_click=add_preferred)
 
 df_restaurants = load_restaurant_data()
+placeholder = st.empty()
 
 if st.session_state.stage == RESTAURANT_SURVEY_STAGE:
-    st.markdown("<h3 style='text-align: center'>Start by taking our survey of eating establishments whose food you enjoy.</h1>", unsafe_allow_html=True)
-    progress_bar = st.progress(st.session_state.progress, text=f"Select {st.session_state.preferred_count} more.")
-    display_restaurants(df_restaurants)
-    if st.button("More restaurants!", type='primary'):
+    with placeholder.container():
+        st.markdown("<h3 style='text-align: center'>Start by taking our survey of eating establishments whose food you enjoy.</h1>", unsafe_allow_html=True)
+        progress_bar = st.progress(st.session_state.progress, text=f"Select {st.session_state.preferred_count} more.")
         display_restaurants(df_restaurants)
+        if st.button("More restaurants!", type='primary'):
+            display_restaurants(df_restaurants)
 
 if st.session_state.preferred_count == 0:
+    placeholder.empty()
+    st.balloons()
     st.session_state.stage = RECIPE_GENERATION_STAGE
 
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
-    progress_bar.empty()
-    st.balloons()
+    st.write('ok')
