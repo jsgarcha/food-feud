@@ -28,21 +28,24 @@ if "progress" not in st.session_state:
 def load_restaurant_data():
     return pd.read_csv('./data/restaurants.csv')
 
-def add_preferred(): # Preference is a row in a DataFrame
+def add_preferred(preferred): # Preference is a row in a DataFrame
+    st.session_state.preferred.append(preferred)
+    #st.session_state.not_preferred.remove(preferred)
     if st.session_state.progress < 100:
         st.session_state.progress += 100//PREFERRED_NUMBER
         st.session_state.preferred_count -= 1
         progress_bar.progress(st.session_state.progress, text=f"Select {st.session_state.preferred_count} more.")
+    df_preferred = pd.DataFrame(st.session_state.preferred)
+    st.dataframe(df_preferred)
 
 def display_restaurants(df_restaurants): 
     col1, col2 = st.columns(2) # Fixed 2 columns
     for i in range(4): # Fixed 4 rows
         with col1:
             random_row = df_restaurants.sample()
-            st.button(random_row['name'].iloc[0], use_container_width=True, on_click=add_preferred)
-        with col2:
-            random_row = df_restaurants.sample()
-            st.button(random_row['name'].iloc[0], use_container_width=True,  on_click=add_preferred)
+            df_restaurants.drop(random_row.index, axis=0, inplace=True) # Remove sample from original, so isn't sampled twice (or more)
+            st.session_state.not_preferred.append(random_row) # Assume all not-clicked are not-prefers; maybe there's a trend to eventually see
+            st.button(random_row['name'].iloc[0], use_container_width=True, on_click=add_preferred, args=[random_row])
 
 df_restaurants = load_restaurant_data()
 
