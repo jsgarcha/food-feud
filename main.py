@@ -26,8 +26,7 @@ if "progress" not in st.session_state:
 
 @st.cache_data
 def load_restaurant_data():
-    df_restaurants = pd.read_csv('./data/restaurants.csv')
-    return df_restaurants
+    return pd.read_csv('./data/restaurants.csv')
 
 def add_preferred(): # Preference is a row in a DataFrame
     if st.session_state.progress < 100:
@@ -37,13 +36,16 @@ def add_preferred(): # Preference is a row in a DataFrame
 
 def display_restaurants(df_restaurants): 
     col1, col2 = st.columns(2) # Fixed 2 columns
-    for i in range(4): # Fixed 4 Rows
+    for i in range(4): # Fixed 4 rows
         with col1:
-            row = df_restaurants.sample()
-            name = row['name']
-            st.button(str(name), use_container_width=True, on_click=add_preferred)
+            random_row = df_restaurants.sample()
+            st.button(random_row['name'].iloc[0], use_container_width=True, on_click=add_preferred)
+        with col2:
+            random_row = df_restaurants.sample()
+            st.button(random_row['name'].iloc[0], use_container_width=True,  on_click=add_preferred)
 
 df_restaurants = load_restaurant_data()
+
 placeholder = st.empty()
 
 if st.session_state.stage == RESTAURANT_SURVEY_STAGE:
@@ -60,4 +62,4 @@ if st.session_state.preferred_count == 0:
     st.session_state.stage = RECIPE_GENERATION_STAGE
 
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
-    st.write('ok')
+    st.write('RECIPE_GENERATION_STAGE')
