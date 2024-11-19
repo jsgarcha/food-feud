@@ -40,7 +40,7 @@ def add_prefer(prefer): # Preference is a row in a DataFrame
         survey_progress_bar.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
     
 def display_restaurants(df_restaurants):
-    samples = df_restaurants.sample(n=8) # 8 random samples, for 8 buttons
+    samples = df_restaurants.sample(n=8) # 8 random restaurants
     st.session_state.not_prefer.append(samples) # Assume all not clicked are not preferred; maybe there's a trend
     with col1:
         sample = samples.iloc[[0]]
