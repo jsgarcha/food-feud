@@ -23,6 +23,10 @@ if "prefer_count" not in st.session_state:
 if "survey_progress" not in st.session_state:
     st.session_state.survey_progress = 0
 
+if "button_rows" not in st.session_state:
+    st.session_state.button_rows = []
+
+
 @st.cache_data
 def load_restaurant_data():
     return pd.read_csv('./data/restaurants.csv')
@@ -35,19 +39,12 @@ def add_prefer(prefer): # Preference is a row in a DataFrame
         st.session_state.prefer_count -= 1
         survey_progress_bar.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
     
-def display_restaurants(df_restaurants): 
-    col1, col2 = st.columns(2) # Fixed 2 columns
-    for i in range(4): # Fixed 4 rows
-        with col1:
-            random_row = df_restaurants.sample()
-            df_restaurants.drop(random_row.index, axis=0, inplace=True) # Remove sample from original, so isn't sampled twice (or more)
-            st.session_state.not_prefer.append(random_row) # Assume all not-clicked are not-prefers; maybe there's a trend to eventually see
-            st.button(random_row['name'].iloc[0], use_container_width=True, on_click=add_prefer, args=[random_row])
-        with col2:
-            random_row = df_restaurants.sample()
-            df_restaurants.drop(random_row.index, axis=0, inplace=True) # Remove sample from original, so isn't sampled twice (or more)
-            st.session_state.not_prefer.append(random_row) # Assume all not-clicked are not-prefers; maybe there's a trend to eventually see
-            st.button(random_row['name'].iloc[0], use_container_width=True, on_click=add_prefer, args=[random_row])
+def display_restaurants(df_restaurants):
+    samples = df_restaurants.sample(n=8) # 8 random samples, for 8 buttons
+    st.session_state.not_prefer.append(samples) # Assume all not clicked are not preferred; maybe there's a trend
+    with col1:
+        sample = samples.iloc[[0]]
+        st.button(sample.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[sample])
 
 df_restaurants = load_restaurant_data()
 
@@ -57,9 +54,9 @@ if st.session_state.stage == RESTAURANT_SURVEY_STAGE:
     with placeholder.container():
         st.markdown("<h3 style='text-align: center'>Start by taking our survey of eating establishments whose food you enjoy.</h1>", unsafe_allow_html=True)
         survey_progress_bar = st.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
+        col1, col2 = st.columns(2) # Fixed 2 columns
         display_restaurants(df_restaurants)
-        if st.button("More restaurants!", type='primary'):
-            display_restaurants(df_restaurants)
+        #if st.button("More restaurants!", type='primary'):
 
 if st.session_state.prefer_count == 0:
     placeholder.empty()
