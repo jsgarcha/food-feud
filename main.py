@@ -26,10 +26,13 @@ if "survey_progress" not in st.session_state:
 if "button_rows" not in st.session_state:
     st.session_state.button_rows = []
 
-
 @st.cache_data
 def load_restaurant_data():
     return pd.read_csv('./data/restaurants.csv')
+
+@st.cache_data
+def get_random_restaurant(num):
+    return df_restaurants.sample(n=num)
 
 def add_prefer(prefer): # Preference is a row in a DataFrame
     st.session_state.prefer.append(prefer) # Build up preferences!
@@ -40,11 +43,13 @@ def add_prefer(prefer): # Preference is a row in a DataFrame
         survey_progress_bar.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
     
 def display_restaurants(df_restaurants):
-    samples = df_restaurants.sample(n=8) # 8 random restaurants
-    st.session_state.not_prefer.append(samples) # Assume all not clicked are not preferred; maybe there's a trend
+    restaurants = get_random_restaurant(8) # 8 random restaurants
+    st.session_state.not_prefer.append(restaurants) # Assume all not clicked are not preferred; maybe there's a trend
     with col1:
-        sample = samples.iloc[[0]]
-        st.button(sample.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[sample])
+        resturant1 = restaurants.iloc[[0]]
+        st.button(resturant1.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[resturant1])
+        resturant2 = restaurants.iloc[[1]]
+        st.button(resturant2.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[resturant2])
 
 df_restaurants = load_restaurant_data()
 
