@@ -1,5 +1,4 @@
 import pandas as pd
-import random
 import streamlit as st
 
 st.markdown("<h1 style='text-align: center'><a href='https://github.com/jsgarcha/food-feud'>Food Feud</a></h1>", unsafe_allow_html=True)
@@ -30,17 +29,21 @@ def load_restaurant_data():
 
 def add_prefer(prefer): # Preference is a row in a DataFrame
     st.session_state.prefer.append(prefer) # Build up preferences!
-    #st.session_state.not_prefer.remove(prefer)
+    #st.session_state.not_prefer.remove(prefer) 
     if st.session_state.survey_progress < 100:
         st.session_state.survey_progress += 100//PREFER_NUMBER
         st.session_state.prefer_count -= 1
         survey_progress_bar.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
     
-
 def display_restaurants(df_restaurants): 
     col1, col2 = st.columns(2) # Fixed 2 columns
     for i in range(4): # Fixed 4 rows
         with col1:
+            random_row = df_restaurants.sample()
+            df_restaurants.drop(random_row.index, axis=0, inplace=True) # Remove sample from original, so isn't sampled twice (or more)
+            st.session_state.not_prefer.append(random_row) # Assume all not-clicked are not-prefers; maybe there's a trend to eventually see
+            st.button(random_row['name'].iloc[0], use_container_width=True, on_click=add_prefer, args=[random_row])
+        with col2:
             random_row = df_restaurants.sample()
             df_restaurants.drop(random_row.index, axis=0, inplace=True) # Remove sample from original, so isn't sampled twice (or more)
             st.session_state.not_prefer.append(random_row) # Assume all not-clicked are not-prefers; maybe there's a trend to eventually see
