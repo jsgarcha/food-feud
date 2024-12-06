@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
+import json
 from recipe_generator import generation_function
+from gemini import chat_session
 
 st.markdown("<h1 style='text-align: center'>Food Feud</h1>", unsafe_allow_html=True)
 
@@ -91,4 +93,9 @@ if st.session_state.stage == RECIPE_GENERATION_STAGE:
     df_restaurant_likes = pd.concat(st.session_state.like)
     
     if st.button('Generate Recipe!', type='primary'):
-        generate_recipe(ingredients)
+        response = chat_session.send_message("")
+        model_response = response.text
+        response = json.loads(model_response)
+        st.write(response)
+        
+        #generate_recipe(ingredients)
