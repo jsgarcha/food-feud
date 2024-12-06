@@ -1,68 +1,70 @@
 import pandas as pd
 import streamlit as st
+from recipe_generator import generation_function
 
-st.markdown("<h1 style='text-align: center'><a href='https://github.com/jsgarcha/food-feud'>Food Feud</a></h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center'>Food Feud</h1>", unsafe_allow_html=True)
 
 RESTAURANT_SURVEY_STAGE = 1
 RECIPE_GENERATION_STAGE = 2
 
-PREFER_NUMBER = 20
+LIKE_NUMBER = 20
 
 if 'stage' not in st.session_state:
     st.session_state.stage = RESTAURANT_SURVEY_STAGE # Start stage
 
-if "prefer" not in st.session_state:
-    st.session_state.prefer = []
+if "like" not in st.session_state:
+    st.session_state.like = []
 
-if "not_prefer" not in st.session_state:
-    st.session_state.not_prefer = []
+if "dislike" not in st.session_state:
+    st.session_state.dislike = []
 
-if "prefer_count" not in st.session_state:
-    st.session_state.prefer_count = PREFER_NUMBER
+if "like_count" not in st.session_state:
+    st.session_state.like_count = LIKE_NUMBER
 
 if "survey_progress" not in st.session_state:
     st.session_state.survey_progress = 0
 
-if "button_rows" not in st.session_state:
-    st.session_state.button_rows = []
+data_path = "data/"
+data_file = "top_restaurants.csv"
 
 @st.cache_data
 def load_restaurant_data():
-    return pd.read_csv('./data/restaurants.csv')
+    return pd.read_csv(data_path+data_file)
 
-@st.cache_data
-def get_random_restaurant(num):
-    return df_restaurants.sample(n=num)
-
-def add_prefer(prefer): # Preference is a row in a DataFrame
-    st.session_state.prefer.append(prefer) # Build up preferences!
-    #st.session_state.not_prefer.remove(prefer) 
+def add_like(like): # Row in a DataFrame
+    st.session_state.like.append(like) # Build up likes
     if st.session_state.survey_progress < 100:
-        st.session_state.survey_progress += 100//PREFER_NUMBER
-        st.session_state.prefer_count -= 1
-        survey_progress_bar.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
-    
-def display_restaurants(df_restaurants):
-    restaurants = get_random_restaurant(8) # 8 random restaurants
-    st.session_state.not_prefer.append(restaurants) # Assume all not clicked are not preferred; maybe there's a trend
-    with col1:
-        restaurant1 = restaurants.iloc[[0]]
-        st.button(restaurant1.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant1])
-        restaurant2 = restaurants.iloc[[1]]
-        st.button(restaurant2.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant2])
-        restaurant3 = restaurants.iloc[[2]]
-        st.button(restaurant3.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant3])
-        restaurant4 = restaurants.iloc[[3]]
-        st.button(restaurant4.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant4])
-    with col2:
-        restaurant5 = restaurants.iloc[[4]]
-        st.button(restaurant5.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant5])
-        restaurant6 = restaurants.iloc[[5]]
-        st.button(restaurant6.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant6])
-        restaurant7 = restaurants.iloc[[6]]
-        st.button(restaurant7.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant7])
-        restaurant8 = restaurants.iloc[[7]]
-        st.button(restaurant8.iloc[0]['name'], use_container_width=True, on_click=add_prefer, args=[restaurant8])
+        st.session_state.survey_progress += 100//LIKE_NUMBER
+        st.session_state.like_count -= 1
+        survey_progress_bar.progress(st.session_state.survey_progress, text=f"Select {st.session_state.like_count} more.")
+
+def add_dislike(dislike):
+     st.session_state.dislike.append(dislike)
+
+ingredients = ['chicken']
+
+def generate_recipe(ingredients):
+    generated = generation_function(ingredients)
+    for text in generated:
+        sections = text.split("\n")
+        for section in sections:
+            section = section.strip()
+            if section.startswith("title:"):
+                section = section.replace("title:", "")
+                headline = "TITLE"
+            elif section.startswith("ingredients:"):
+                section = section.replace("ingredients:", "")
+                headline = "Ingredients"
+            elif section.startswith("directions:"):
+                section = section.replace("directions:", "")
+                headline = "Directions"
+            
+            if headline == "TITLE":
+                st.markdown("<h3 style='text-align: center'>"+str(section.strip().capitalize())+"</h3>", unsafe_allow_html=True)
+            else:
+                section_info = [f"  - {info.strip().capitalize()}" for i, info in enumerate(section.split("--"))]
+                st.markdown("<h4>"+f'{headline}'+"</h4>", unsafe_allow_html=True)
+                st.write("\n".join(section_info))
 
 df_restaurants = load_restaurant_data()
 
@@ -70,18 +72,23 @@ placeholder = st.empty()
 
 if st.session_state.stage == RESTAURANT_SURVEY_STAGE:
     with placeholder.container():
-        st.markdown("<h3 style='text-align: center'>Start by taking our survey of eating establishments whose food you enjoy.</h1>", unsafe_allow_html=True)
-        survey_progress_bar = st.progress(st.session_state.survey_progress, text=f"Select {st.session_state.prefer_count} more.")
-        col1, col2 = st.columns(2) # Fixed 2 columns
-        display_restaurants(df_restaurants)
-        if st.button("More restaurants!", type='primary'):
-            display_restaurants(df_restaurants)
+        st.markdown("<h4 style='text-align: center'>Start by taking our survey of eating establishments whose food you enjoy.</h4>", unsafe_allow_html=True)
+        survey_progress_bar = st.progress(st.session_state.survey_progress, text=f"Select {st.session_state.like_count} more.")
+        restaurant = df_restaurants.sample()
+        st.markdown("<h3 style='text-align: center'>"+restaurant.iloc[0]['name']+"</h3>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        if col1.button('Yes 👍', type="secondary", use_container_width=True):
+            add_like(restaurant)
+        if col2.button('No 👎', type="secondary", use_container_width=True):
+            add_dislike(restaurant)
 
-if st.session_state.prefer_count == 0:
+if st.session_state.like_count == 0 and st.session_state.stage != RECIPE_GENERATION_STAGE:
     placeholder.empty()
     st.balloons()
     st.session_state.stage = RECIPE_GENERATION_STAGE
 
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
-    df_restaurant_preferences = pd.concat(st.session_state.prefer)
-    st.dataframe(df_restaurant_preferences)
+    df_restaurant_likes = pd.concat(st.session_state.like)
+    
+    if st.button('Generate Recipe!', type='primary'):
+        generate_recipe(ingredients)

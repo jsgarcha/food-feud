@@ -1,2 +1,7 @@
-restaurants.csv
-restaurant-menus.csv
+__pycache__/
+.env
+requirements.txt
+data/
+*.csv
+*.env
+*.txt
