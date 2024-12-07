@@ -45,28 +45,28 @@ def add_like(like): # Row in a DataFrame
 def add_dislike(dislike):
      st.session_state.dislike.append(dislike)
 
+
 def generate_recipe(ingredients):
     generated = generation_function(ingredients)
-    for text in generated:
-        sections = text.split("\n")
-        for section in sections:
-            section = section.strip()
-            if section.startswith("title:"):
-                section = section.replace("title:", "")
-                headline = "TITLE"
-            elif section.startswith("ingredients:"):
-                section = section.replace("ingredients:", "")
-                headline = "Ingredients"
-            elif section.startswith("directions:"):
-                section = section.replace("directions:", "")
-                headline = "Directions"
-            
-            if headline == "TITLE":
-                st.markdown("<h3 style='text-align: center'>"+str(section.strip().capitalize())+"</h3>", unsafe_allow_html=True)
-            else:
-                section_info = [f"  - {info.strip().capitalize()}" for i, info in enumerate(section.split("--"))]
-                st.markdown("<h4>"+f'{headline}'+"</h4>", unsafe_allow_html=True)
-                st.write("\n".join(section_info))
+    sections = generated.split("\n")
+    for section in sections:
+        section = section.strip()
+        if section.startswith("title:"):
+            section = section.replace("title:", "")
+            headline = "TITLE"
+        elif section.startswith("ingredients:"):
+            section = section.replace("ingredients:", "")
+            headline = "Ingredients"
+        elif section.startswith("directions:"):
+            section = section.replace("directions:", "")
+            headline = "Directions"
+        
+        if headline == "TITLE":
+            st.markdown("<h3 style='text-align: center'>"+str(section.strip().capitalize())+"</h3>", unsafe_allow_html=True)
+        else:
+            section_info = [f"  - {info.strip().capitalize()}" for i, info in enumerate(section.split("--"))]
+            st.markdown("<h4>"+f'{headline}'+"</h4>", unsafe_allow_html=True)
+            st.write("\n".join(section_info))
 
 df_restaurants = load_restaurant_data()
 
@@ -92,9 +92,14 @@ if st.session_state.like_count == 0 and st.session_state.stage != RECIPE_GENERAT
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
     df_restaurant_likes = pd.concat(st.session_state.like)
     if st.button('Generate Recipe!', type='primary'):
-        response = chat_session.send_message("List common ingredients in Italian food.")
-        model_response = response.text
-        response = json.loads(model_response)
-        ingredients = response['ingredients']
+        #response = chat_session.send_message("List common ingredients in Italian food.")
+        #model_response = response.text
+        #response = json.loads(model_response)
+        #time.sleep(3)
+        #ingredients = response['ingredients']
         #my_string = ','.join(map(str, ingredients))
-        generate_recipe(ingredients)
+        #st.write(my_string)
+        #random.shuffle(my_list)
+        items = ["macaroni, butter, salt, bacon, milk, flour, pepper, cream corn"]
+        # cut down ingredients to 
+        generate_recipe(items)

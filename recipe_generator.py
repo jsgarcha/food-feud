@@ -1,19 +1,12 @@
 from transformers import FlaxAutoModelForSeq2SeqLM
 from transformers import AutoTokenizer
+import streamlit
 
 MODEL_NAME_OR_PATH = "flax-community/t5-recipe-generation"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME_OR_PATH, use_fast=True)
 model = FlaxAutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME_OR_PATH)
 
 prefix = "items: "
-# generation_kwargs = {
-#     "max_length": 512,
-#     "min_length": 64,
-#     "no_repeat_ngram_size": 3,
-#     "early_stopping": True,
-#     "num_beams": 5,
-#     "length_penalty": 1.5,
-# }
 generation_kwargs = {
     "max_length": 512,
     "min_length": 64,
@@ -28,10 +21,10 @@ tokens_map = {
     "<sep>": "--",
     "<section>": "\n"
 }
+
 def skip_special_tokens(text, special_tokens):
     for token in special_tokens:
         text = text.replace(token, "")
-
     return text
 
 def target_postprocessing(texts, special_tokens):
@@ -49,11 +42,11 @@ def target_postprocessing(texts, special_tokens):
 
     return new_texts
 
-def generation_function(texts):
-    _inputs = texts if isinstance(texts, list) else [texts]
-    inputs = [prefix + inp for inp in _inputs]
+def generation_function(text):
+    # Ensure the input is a single string
+    _input = prefix + str(text)
     inputs = tokenizer(
-        inputs, 
+        _input, 
         max_length=256, 
         padding="max_length", 
         truncation=True, 
@@ -63,6 +56,7 @@ def generation_function(texts):
     input_ids = inputs.input_ids
     attention_mask = inputs.attention_mask
 
+    # Generate the output sequence
     output_ids = model.generate(
         input_ids=input_ids, 
         attention_mask=attention_mask,
@@ -73,4 +67,4 @@ def generation_function(texts):
         tokenizer.batch_decode(generated, skip_special_tokens=False),
         special_tokens
     )
-    return generated_recipe
+    return generated_recipe[0]  # Only return the first recipe generated
