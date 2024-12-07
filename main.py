@@ -92,5 +92,9 @@ if st.session_state.like_count == 0 and st.session_state.stage != RECIPE_GENERAT
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
     df_restaurant_likes = pd.concat(st.session_state.like)
     if st.button('Generate Recipe!', type='primary'):
-        items = ["macaroni"]     
-        generate_recipe(items)
+        response = chat_session.send_message("List common ingredients in Italian food.")
+        model_response = response.text
+        response = json.loads(model_response)
+        ingredients = response['ingredients']
+        #my_string = ','.join(map(str, ingredients))
+        generate_recipe(ingredients)
