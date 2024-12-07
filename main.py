@@ -3,15 +3,20 @@ import streamlit as st
 import json
 from recipe_generator import generation_function
 from gemini import chat_session
+import os
+
+# Suppress logging warnings
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+os.environ["GLOG_minloglevel"] = "2"
 
 st.markdown("<h1 style='text-align: center'>Food Feud</h1>", unsafe_allow_html=True)
 
 RESTAURANT_SURVEY_STAGE = 1
 RECIPE_GENERATION_STAGE = 2
 
-selected_categories = ['Steak', 'Chinese', 'Japanese', 'Italian', 'Indian', 'Mediterranean']
+top_food_categories = ['Steak', 'Chinese', 'Japanese', 'Italian', 'Indian', 'Mediterranean'] # "Top" is relative to our data set; meaning, these categories exhibited the "cleanest" data. To be changed later.
 
-LIKE_NUMBER = 1
+LIKE_NUMBER = 20
 
 if 'stage' not in st.session_state:
     st.session_state.stage = RESTAURANT_SURVEY_STAGE # Start stage
@@ -44,7 +49,6 @@ def add_like(like): # Row in a DataFrame
 
 def add_dislike(dislike):
      st.session_state.dislike.append(dislike)
-
 
 def generate_recipe(ingredients):
     generated = generation_function(ingredients)
@@ -92,11 +96,13 @@ if st.session_state.like_count == 0 and st.session_state.stage != RECIPE_GENERAT
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
     df_restaurant_likes = pd.concat(st.session_state.like)
     if st.button('Generate Recipe!', type='primary'):
-        response = chat_session.send_message("List common ingredients in Italian food.")
+        liked_restaurant = df_restaurant_likes.sample()
+        liked_restaurant_categories = liked_restaurant['category'].values[0]
+        liked_restaurant_category = [category for category in top_food_categories if category in liked_restaurant_categories][0]
+
+        response = chat_session.send_message(f"List common ingredients in {liked_restaurant_category} food.")
         model_response = response.text
         response = json.loads(model_response)
         ingredients = response['ingredients']
-        my_string = ','.join(map(str, ingredients))
-        #items = ["macaroni, butter, salt, bacon, milk, flour, pepper, cream corn"]
-        # cut down ingredients to 
-        generate_recipe(my_string)
+
+        generate_recipe(','.join(map(str, ingredients)))
