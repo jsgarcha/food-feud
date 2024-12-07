@@ -1,7 +1,4 @@
 __pycache__/
 data/
 *.csv
-*.env
-*.txt
 .env
-.gotignore
