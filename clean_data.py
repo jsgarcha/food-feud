@@ -40,6 +40,8 @@ all_categories = (
     .explode()  # Flatten the lists into a single series
     .str.strip()  # Remove any leading/trailing whitespace
 )
+# Define the 7 selected categories
+selected_categories = ['steak', 'chinese', 'japanese', 'italian', 'indian', 'mediterranean']
 
     # Finding the frequencies of each unique category
 category_counts = all_categories.value_counts()

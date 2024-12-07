@@ -9,7 +9,9 @@ st.markdown("<h1 style='text-align: center'>Food Feud</h1>", unsafe_allow_html=T
 RESTAURANT_SURVEY_STAGE = 1
 RECIPE_GENERATION_STAGE = 2
 
-LIKE_NUMBER = 20
+selected_categories = ['Steak', 'Chinese', 'Japanese', 'Italian', 'Indian', 'Mediterranean']
+
+LIKE_NUMBER = 1
 
 if 'stage' not in st.session_state:
     st.session_state.stage = RESTAURANT_SURVEY_STAGE # Start stage
@@ -42,8 +44,6 @@ def add_like(like): # Row in a DataFrame
 
 def add_dislike(dislike):
      st.session_state.dislike.append(dislike)
-
-ingredients = ['chicken']
 
 def generate_recipe(ingredients):
     generated = generation_function(ingredients)
@@ -91,11 +91,6 @@ if st.session_state.like_count == 0 and st.session_state.stage != RECIPE_GENERAT
 
 if st.session_state.stage == RECIPE_GENERATION_STAGE:
     df_restaurant_likes = pd.concat(st.session_state.like)
-    
     if st.button('Generate Recipe!', type='primary'):
-        response = chat_session.send_message("")
-        model_response = response.text
-        response = json.loads(model_response)
-        st.write(response)
-        
-        #generate_recipe(ingredients)
+        items = ["macaroni"]     
+        generate_recipe(items)
