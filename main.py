@@ -38,7 +38,7 @@ def load_restaurant_data():
     return pd.read_csv(data_path+data_file)
 
 def clear_string(s):
-    return re.sub(r"\(.*?\)", "", s).split('-')[0].replace("&amp;", "&")
+    return re.sub(r"\(.*?\)", "", s).split('-')[0].replace("&amp;", "&").strip()
 
 def add_like(like): # Row in a DataFrame
     st.session_state.like.append(like) # Build up likes
@@ -110,7 +110,12 @@ if st.session_state.stage == RECIPE_GENERATION_STAGE:
             ingredients = response['ingredients']
             random.shuffle(ingredients) # Change
 
-            st.markdown("<h4 style='text-align: center'>Based on your like of "+clear_string(liked_restaurant.iloc[0]['name'])+", survey says...</h4>", unsafe_allow_html=True)
+            st.markdown(
+                "<h4 style='text-align: center'>Based on your like of <span style='color: red;'>"
+                + clear_string(liked_restaurant.iloc[0]['name']) + 
+                "</span>, survey says...</h4>", 
+                unsafe_allow_html=True
+            )
             generate_recipe(','.join(map(str, ingredients)))
 
 # 2 major things to be fixed: 
